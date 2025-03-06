@@ -2,8 +2,17 @@ from shoot_functions import get_shoot
 from player_functions import get_stats_player
 from match_functions import get_match
 from base_functions import get_link_matchs, page
+from datetime import datetime, timedelta
+import random
+import re
+import functools
 import time
+import requests
 import pandas as pd
+import numpy as np
+from bs4 import BeautifulSoup
+import dateparser
+import locale
 
 def get_database(date_start, date_end, leagues, folder):
     
