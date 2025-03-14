@@ -22,7 +22,7 @@ def page_old(urlpage):
     soup = BeautifulSoup(res.text, 'html.parser')
     return soup
 
-@functools.cache
+
 def page(urlpage):
     """
     Récupération du HTML d'un site internet en prenant des précautions contre le blocage.
