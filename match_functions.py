@@ -1,4 +1,5 @@
 from datetime import datetime
+from tqdm import tqdm
 import re
 import time
 import pandas as pd
@@ -6,10 +7,15 @@ import dateparser
 from base_functions import get_link_matchs, page
 
 
-def get_team(soup):
+##############
+# I. Events  #
+##############
+
+
+def get_teams_name(soup):
     code = soup.find("div", class_="scorebox").find_all("a")
-    teams = [c.text for c in code if "equipes" in c.get("href")]
-    return teams
+    teams_name = [c.text for c in code if "equipes" in c.get("href")]
+    return teams_name
 
 
 def get_event_details(soup):
@@ -23,7 +29,7 @@ def get_event_details(soup):
     hours = re.sub(r'\s*\([^)]*\)', '',
                    soup.find_all("span", class_="venuetime")[0].text)  # Hours
 
-    spectators = "NaN"
+    # spectators = "NaN"
 
     for i in range(len(code.find_all("span"))):
         if "Arbitre" in code.find_all("span")[i].text:
@@ -32,8 +38,8 @@ def get_event_details(soup):
     for i in range(len(code.find_all("small"))):
         if "Tribune" in code.find_all("small")[i].text:
             stadium = code.find_all("small")[i+1].text.split(',')[0]
-        if "Affluence" in code.find_all("small")[i].text:
-            spectators = int(code.find_all("small")[i+1].text.replace(",", ""))
+        # if "Affluence" in code.find_all("small")[i].text:
+        #    spectators = int(code.find_all("small")[i+1].text.replace(",", ""))
 
     date_obj = datetime.strptime(
         dateparser.parse(
@@ -45,7 +51,16 @@ def get_event_details(soup):
     else:
         season = f"{date_obj.year-1}/{date_obj.year}"
 
-    return [league, journey, season, date, hours, referee, spectators, stadium]
+    return [league, journey, season, date, hours, referee, stadium]
+
+def get_event(soup):
+    event = get_event_details(soup) + get_teams_name(soup)
+    return event
+
+
+##############
+# II. Stats  #
+##############
 
 
 def get_score(soup):
@@ -67,7 +82,7 @@ def get_possession(soup):
     return possession
 
 
-def get_stats(soup):
+def get_global_stats(soup):
     stats = []
     code = soup.find_all('div', id='team_stats')[0].find_all("div")
     for i in range(len(code)):
@@ -85,7 +100,7 @@ def get_stats(soup):
     return stats
 
 
-def info_match(soup):
+def get_details_stats(soup):
 
     info_match = []
     code = soup.find_all('div', id='team_stats_extra')[0].find_all("div")
@@ -140,38 +155,6 @@ def info_match(soup):
     return info_match
 
 
-def get_coach(soup):
-    code = soup.find_all("div", class_="datapoint")
-    coach = [
-        c.text.replace("\xa0", " ").split(": ")[1]
-        for c in code
-        if "Entraineur" in c.text.replace("\xa0", " ").split(": ")[0]
-    ]
-    return coach
-
-
-def get_compo(soup):
-    code = soup.find_all("div", class_="lineup")
-    compo = [
-        c.find('tr').text.split(" (")[1].replace(")", "")
-        for c in code
-    ]
-    return compo
-
-
-def get_effectif(soup):
-    equipe1 = []
-    equipe2 = []
-    code = soup.find_all("div", class_="lineup")
-    for i in range(len(code[0].find_all("a"))):
-        equipe1.append(code[0].find_all("a")[i].text)
-
-    for i in range(len(code[1].find_all("a"))):
-        equipe2.append(code[1].find_all("a")[i].text)
-
-    return [equipe1, equipe2]
-
-
 def get_cards(soup):
     code = soup.find_all("div", class_="cards")
 
@@ -197,22 +180,71 @@ def get_cards(soup):
     return cards
 
 
+def get_stats(soup):
+    stats = get_score(soup) + get_xg(soup) + get_possession(soup) + get_global_stats(soup) + get_details_stats(soup) + get_cards(soup)
+    return stats
+
+
+#################
+# III. Tactics  #
+#################
+
+
+def get_coach(soup):
+    code = soup.find_all("div", class_="datapoint")
+    coach = [
+        c.text.replace("\xa0", " ").split(": ")[1]
+        for c in code
+        if "Entraineur" in c.text.replace("\xa0", " ").split(": ")[0]
+    ]
+    return coach
+
+
+def get_compo(soup):
+    code = soup.find_all("div", class_="lineup")
+    compo = [
+        c.find('tr').text.split(" (")[1].replace(")", "")
+        for c in code
+    ]
+    return compo
+
+
+def get_teams(soup):
+    equipe1 = []
+    equipe2 = []
+    code = soup.find_all("div", class_="lineup")
+    for i in range(len(code[0].find_all("a"))):
+        equipe1.append(code[0].find_all("a")[i].text)
+
+    for i in range(len(code[1].find_all("a"))):
+        equipe2.append(code[1].find_all("a")[i].text)
+
+    return [equipe1, equipe2]
+
+
+def get_tactics(soup):
+    tactics = get_coach(soup) + get_compo(soup) + get_teams(soup)
+    return tactics
+
+
+##############
+# IV. Match  #
+##############
+
+
 def get_match(soup):
-    match = get_event_details(soup)[0:3] + get_team(soup) + get_score(soup)
-    match = match + get_xg(soup) + get_possession(soup) + get_stats(soup)
-    match = match + info_match(soup) + get_cards(soup)
-    match = match + get_event_details(soup)[3:8] + get_coach(soup)
-    match = match + get_compo(soup) + get_effectif(soup)
+    match = get_event(soup) + get_stats(soup) + get_tactics(soup)
     return match
 
 
 def get_match_database(date_start, date_end, leagues, save, add):
     t = time.time()
     links = get_link_matchs(date_start, date_end, leagues)
-    var = ["Championnat", "Journée", "Saison", "Equipe1", "Equipe2", "Score1",
-           "Score2", "xG1", "xG2", "Possession1", "Possession2", "Passes1",
-           "Passes réussies1", "% Passes réussies1", "Passes2",
-           "Passes réussies2", "% Passes réussies2", "Tirs1", "Tirs cadrés1",
+    var = ["Championnat", "Journée", "Saison", "Date", "Heure", "Arbitre",
+           "Stade""Equipe1", "Equipe2", "Score1", "Score2", "xG1", "xG2", 
+           "Possession1", "Possession2", "Passes1", "Passes réussies1", 
+           "% Passes réussies1", "Passes2", "Passes réussies2", 
+           "% Passes réussies2", "Tirs1", "Tirs cadrés1",
            "% Tirs cadrés1", "Tirs2", "Tirs cadrés2", "% Tirs cadrés2",
            "Arrêts possibles1", "Arrêts1", "% Arrêts1", "Arrêts possibles2",
            "Arrêts2", "% Arrêts2", "Fautes1", "Fautes2", "Corners1",
@@ -223,19 +255,15 @@ def get_match_database(date_start, date_end, leagues, save, add):
            "Dégagements au six mètres1", "Dégagements au six mètres2",
            "Rentrée de touche1", "Rentrée de touche2", "Longs ballons1",
            "Longs ballons2", "Cartons jaunes1", "Cartons jaunes2",
-           "Cartons rouges1", "Cartons rouges2", "Date", "Heure", "Arbitre",
-           "Affluence", "Stade", "Entraineur1", "Entraineur2", "Dispositif1",
-           "Dispositif2", "Composition1", "Composition2"]
+           "Cartons rouges1", "Cartons rouges2", "Entraineur1", "Entraineur2", 
+           "Dispositif1", "Dispositif2", "Composition1", "Composition2", "link"]
     data = []
-    z = 0  # Initialisation d'un compteur
     print("Chargement de la base de données...")
     print(" ")
-    for link in links:
-        z += 1
+    for link in tqdm(links):
         soup = page(link)
-        print("Chargement : ", round((z/len(links))*100), "%", end="\r")
-        info = get_match(soup)
-        data.append(info)
+        match = get_match(soup) + [link]
+        data.append(match)
     data = pd.DataFrame(data, columns=var)
     print("Extraction terminée en ", round((time.time() - t)/60, 2), "minutes")
     return data
