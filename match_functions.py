@@ -241,7 +241,7 @@ def get_match_database(date_start, date_end, leagues, save, add):
     t = time.time()
     links = get_link_matchs(date_start, date_end, leagues)
     var = ["Championnat", "Journée", "Saison", "Date", "Heure", "Arbitre",
-           "Stade""Equipe1", "Equipe2", "Score1", "Score2", "xG1", "xG2", 
+           "Stade", "Equipe1", "Equipe2", "Score1", "Score2", "xG1", "xG2", 
            "Possession1", "Possession2", "Passes1", "Passes réussies1", 
            "% Passes réussies1", "Passes2", "Passes réussies2", 
            "% Passes réussies2", "Tirs1", "Tirs cadrés1",

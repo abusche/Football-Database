@@ -7,12 +7,9 @@ from tqdm import tqdm
 import random
 import cloudscraper
 
-
+""""
 @functools.cache
 def page_old(urlpage):
-    """
-    Récupération du HTML d'un site internet via Beautifulsoup
-    """
     user_agent = {
         'User-Agent':
         ('Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36')
@@ -21,7 +18,7 @@ def page_old(urlpage):
     res = requests.get(urlpage, headers=user_agent)
     soup = BeautifulSoup(res.text, 'html.parser')
     return soup
-
+"""
 
 def page(urlpage):
     """
