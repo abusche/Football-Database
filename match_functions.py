@@ -238,7 +238,7 @@ def get_match(soup):
 
 
 def get_match_database(date_start, date_end, leagues, save, add):
-    t = time.time()
+    T = time.time()
     links = get_link_matchs(date_start, date_end, leagues)
     var = ["Championnat", "Journée", "Saison", "Date", "Heure", "Arbitre",
            "Stade", "Equipe1", "Equipe2", "Score1", "Score2", "xG1", "xG2", 
@@ -258,12 +258,15 @@ def get_match_database(date_start, date_end, leagues, save, add):
            "Cartons rouges1", "Cartons rouges2", "Entraineur1", "Entraineur2", 
            "Dispositif1", "Dispositif2", "Composition1", "Composition2", "link"]
     data = []
-    print("Chargement de la base de données...")
-    print(" ")
+
     for link in tqdm(links):
+        t = time.time()
         soup = page(link)
         match = get_match(soup) + [link]
         data.append(match)
+        while time.time() - t <= 4:
+            time.sleep(0.01)
+
     data = pd.DataFrame(data, columns=var)
-    print("Extraction terminée en ", round((time.time() - t)/60, 2), "minutes")
+    print("Extraction terminée en ", round((time.time() - T)/60, 2), "minutes")
     return data
