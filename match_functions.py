@@ -264,7 +264,7 @@ def get_match_database(date_start, date_end, leagues, save, add):
         soup = page(link)
         match = get_match(soup) + [link]
         data.append(match)
-        while time.time() - t <= 4:
+        while time.time() - t <= 4.1:
             time.sleep(0.01)
 
     data = pd.DataFrame(data, columns=var)

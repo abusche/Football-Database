@@ -112,7 +112,7 @@ def get_link_matchs(date_start, date_end, leagues):
                         if "matchs" in href and "Rapport de match" in k.text:
                             links.append('https://fbref.com' + k.get("href"))
     
-        while time.time() - t <= 4:
+        while time.time() - t <= 4.1:
             time.sleep(0.01)
         
     return links
