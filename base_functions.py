@@ -47,7 +47,6 @@ def page(urlpage):
 
 def gen_link_day(date_start, date_end):
 
-    print("Extraction des liens...\n")
     start_date = datetime.strptime(date_start, '%Y-%m-%d')
     end_date = datetime.strptime(date_end, '%Y-%m-%d')
     links_day = []
@@ -91,7 +90,7 @@ def get_link_matchs(date_start, date_end, leagues):
 
     return links
 """
-
+"""
 def get_link_matchs(date_start, date_end, leagues):
 
     links_day = gen_link_day(date_start, date_end)
@@ -115,4 +114,34 @@ def get_link_matchs(date_start, date_end, leagues):
         while time.time() - t <= 4.1:
             time.sleep(0.01)
         
+    return links
+"""
+
+def get_link_matchs(date_start, date_end, leagues):
+
+    links_day = gen_link_day(date_start, date_end)
+    links = []
+
+    with tqdm(total=len(links_day), desc="Extraction des liens des matchs", unit="Lien", colour="green") as pbar:
+        for link_day in links_day:
+
+            t = time.time()
+
+            soup = page(link_day)
+            matchs = soup.find_all("div", class_="table_wrapper tabbed")
+            for match in matchs:
+                if match.find("a"):
+                    if match.find("a").text in leagues:
+                        m = match.find_all("a")
+                        for k in m:
+                            href = k.get("href")
+                            if "matchs" in href and "Rapport de match" in k.text:
+                                links.append('https://fbref.com' + k.get("href"))
+
+            while time.time() - t <= 4.1:
+                time.sleep(0.01)
+
+            pbar.set_postfix({"Matchs trouvés": len(matchs), "Nombre total de matchs": len(links)})
+            pbar.update(1)
+
     return links

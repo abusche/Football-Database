@@ -30,6 +30,7 @@ def get_event_details(soup):
                    soup.find_all("span", class_="venuetime")[0].text)  # Hours
 
     # spectators = "NaN"
+    referee = "NaN"
 
     for i in range(len(code.find_all("span"))):
         if "Arbitre" in code.find_all("span")[i].text:
@@ -259,7 +260,7 @@ def get_match_database(date_start, date_end, leagues, save, add):
            "Dispositif1", "Dispositif2", "Composition1", "Composition2", "link"]
     data = []
 
-    for link in tqdm(links):
+    for link in tqdm(links, desc="Extraction des données des matchs", unit="Matchs", colour="green"):
         t = time.time()
         soup = page(link)
         match = get_match(soup) + [link]

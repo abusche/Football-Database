@@ -1,34 +1,27 @@
-from datetime import datetime, timedelta
-import random
-import re
-import functools
 import time
-import requests
 import pandas as pd
-import numpy as np
-from bs4 import BeautifulSoup
-import dateparser
-import locale
+from tqdm import tqdm
 
 from base_functions import get_link_matchs, page
+from match_functions import get_event
 
-from match_functions import get_team, get_event_details
 
 # Résumé
-
 def get_summary(soup):
-    
-    index = get_team(soup)[0] + "_" + get_team(soup)[1] + "_" + get_event_details(soup)[0] + "_" + get_event_details(soup)[1] + "_" + get_event_details(soup)[2]
-    
-    var = ["Match_Index", "Nom", "Numéro", "Nationalité", "Poste", "Âge", "Minutes", "Buts", "PD", "PénM", "PénT", "Tirs", "TC", "CJ", "CR", "Touches", "Tcl", "Int", "BallContr", "xG", "npxG", "xAG", "AMT", "AMB", "PassR", "PassT", 
-           "%PassR", "PrgP", "BallPied", "PrgC", "DriT", "DriR"]
-    
+
+    var = ["league", "journey", "season", "date", "hours", "referee",
+           "stadium", "teams1", "team2", "Nom", "Numéro", "Nationalité",
+           "Poste", "Âge", "Minutes", "Buts", "PD", "PénM", "PénT", "Tirs",
+           "TC", "CJ", "CR", "Touches", "Tcl", "Int", "BallContr", "xG",
+           "npxG", "xAG", "AMT", "AMB", "PassR", "PassT", "%PassR", "PrgP",
+           "BallPied", "PrgC", "DriT", "DriR"]
+
     data = []
 
     code = soup.find_all("div", class_="table_container tabbed current")[0].find_all('th', class_="left")
     for i in range(len(code)-2):
         name = code[i+1].text
-        stat = [index, name]
+        stat = get_event(soup) + [name]
         code2 = soup.find_all("div", class_="table_container tabbed current")[0].find_all('tr')[i+2].find_all("td")
         for i in range(len(code2)):
             stat.append(code2[i].text)
@@ -37,24 +30,26 @@ def get_summary(soup):
     code = soup.find_all("div", class_="table_container tabbed current")[1].find_all('th', class_="left")
     for i in range(len(code)-2):
         name = code[i+1].text
-        stat = [index, name]
+        stat = get_event(soup) + [name]
         code2 = soup.find_all("div", class_="table_container tabbed current")[1].find_all('tr')[i+2].find_all("td")
         for i in range(len(code2)):
             stat.append(code2[i].text)
         data.append(stat)
 
     data = pd.DataFrame(data, columns=var)
-    
+
     return data
 
 
 # Passes
-
 def get_passes(soup):
 
-    var = ["Nom", "Numéro", "Nationalité", "Poste", "Âge", "Minutes", "PassR", "PassT", "%PassR", "PassTotDist", "PassDistBut", "PassCR", "PassCT", "%PassCR", "PassMR", "PassMT", "%PassMR", "PassLR", "PassLT", 
-           "%PassLR", "PD", "xAG", "xA", "PC", "Pass1/3", "PPA", "CntSR", "PrgP"]
-    
+    var = ["Nom", "Numéro", "Nationalité", "Poste", "Âge", "Minutes", "PassR",
+           "PassT", "%PassR", "PassTotDist", "PassDistBut", "PassCR", "PassCT",
+           "%PassCR", "PassMR", "PassMT", "%PassMR", "PassLR", "PassLT",
+           "%PassLR", "PD", "xAG", "xA", "PC", "Pass1/3", "PPA", "CntSR",
+           "PrgP"]
+
     data = []
 
     code = soup.find_all("div", class_="table_container tabbed")[0].find_all('th', class_="left")
@@ -76,14 +71,16 @@ def get_passes(soup):
         data.append(stat)
 
     data = pd.DataFrame(data, columns=var)
-    
+
     return data
 
 
 # Type de passe
 def get_passes_type(soup):
-    
-    var = ["Nom", "Numéro", "Nationalité", "Poste", "Âge", "Minutes", "PassT", "ActJeu", "CdPA", "CF", "PassProf", "Tr", "Ctr", "PCF", "Co", "CoRentrant", "CoSortant", "CoDroit", "PassR", "PassHJ", 
+
+    var = ["Nom", "Numéro", "Nationalité", "Poste", "Âge", "Minutes", "PassT",
+           "ActJeu", "CdPA", "CF", "PassProf", "Tr", "Ctr", "PCF", "Co",
+           "CoRentrant", "CoSortant", "CoDroit", "PassR", "PassHJ",
            "PassBlqAdv"]
 
     data = []
@@ -112,10 +109,12 @@ def get_passes_type(soup):
 
 # Action défensive
 def get_defensive_action(soup):
-    
-    var = ["Nom", "Numéro", "Nationalité", "Poste", "Âge", "Minutes", "Tcl", "TclR", "TclZDéf", "TclMilTer", "TclZOff", "TclDribT", "TclDribR", "%TclDrib", "TclDribM", "BallContr", "TirBlq", "PassBlq", "Int",
-          "Tcl+Int", "Dég", "Err"]
-    
+
+    var = ["Nom", "Numéro", "Nationalité", "Poste", "Âge", "Minutes", "Tcl",
+           "TclR", "TclZDéf", "TclMilTer", "TclZOff", "TclDribT", "TclDribR",
+           "%TclDrib", "TclDribM", "BallContr", "TirBlq", "PassBlq", "Int",
+           "Tcl+Int", "Dég", "Err"]
+
     data = []
 
     code = soup.find_all("div", class_="table_container tabbed")[2].find_all('th', class_="left")
@@ -136,16 +135,20 @@ def get_defensive_action(soup):
             stat.append(code2[i].text)
         data.append(stat)
 
-    data = pd.DataFrame(data,columns=var)
+    data = pd.DataFrame(data, columns=var)
     return data
 
 
 # Possession
 def get_Possession(soup):
-    
-    var = ["Nom", "Numéro", "Nationalité", "Poste", "Âge", "Minutes", "Touches", "TouchesSurfRépDéf", "TouchesZDéf", "TouchesMilTer", "TouchesZOff", "TouchesSurfRépAdv", "Touches2", "DriT", "DriR", "%DriR", 
-           "Tkld", "%Tkld", "BallPied", "TotDist", "DistBut", "PrgC", "Chev1/3", "CSR", "CtrM", "PerteBall", "PassRecu", "PrgPR"]
-    
+
+    var = ["Nom", "Numéro", "Nationalité", "Poste", "Âge", "Minutes",
+           "Touches", "TouchesSurfRépDéf", "TouchesZDéf", "TouchesMilTer",
+           "TouchesZOff", "TouchesSurfRépAdv", "Touches2", "DriT", "DriR",
+           "%DriR", "Tkld", "%Tkld", "BallPied", "TotDist", "DistBut",
+           "PrgC", "Chev1/3", "CSR", "CtrM", "PerteBall", "PassRecu",
+           "PrgPR"]
+
     data = []
 
     code = soup.find_all("div", class_="table_container tabbed")[3].find_all('th', class_="left")
@@ -173,9 +176,11 @@ def get_Possession(soup):
 
 # Statistiques diverses
 def get_divers_stats(soup):
-    
-    var = ["Nom", "Numéro", "Nationalité", "Poste", "Âge", "Minutes", "CJ", "CR", "2CrtJ", "FtC", "FtP", "HJ", "Ctr", "Int", "TclR", "PénM", "PCon", "CSC", "Récup", "DAG", "DAP", "%DAG"]
-    
+
+    var = ["Nom", "Numéro", "Nationalité", "Poste", "Âge", "Minutes", "CJ",
+           "CR", "2CrtJ", "FtC", "FtP", "HJ", "Ctr", "Int", "TclR", "PénM",
+           "PCon", "CSC", "Récup", "DAG", "DAP", "%DAG"]
+
     data = []
 
     code = soup.find_all("div", class_="table_container tabbed")[4].find_all('th', class_="left")
@@ -205,10 +210,16 @@ def keep_uppercase(input_string):
 
 
 def get_stat_goal(soup):
+
     GK1 = []
     GK2 = []
-    var = ["Nom", "Nationalité", "Âge", "Minutes", "TCC", "BE", "Arrêts", "%Arrêts", "PSxG", "DégR", "DégT", "%DégR", "PassTent", "LancT", "%PassLanc", "LongPassMoy", "DégSixMetres", "%DégSixMetres", 
-               "LongMoySixMetres", "CtrConc", "CtrStop", "%CtrStop", "ActDéfSurfRép", "DistMoyActDéf"]
+
+    var = ["Nom", "Nationalité", "Âge", "Minutes", "TCC", "BE", "Arrêts",
+           "%Arrêts", "PSxG", "DégR", "DégT", "%DégR", "PassTent", "LancT",
+           "%PassLanc", "LongPassMoy", "DégSixMetres", "%DégSixMetres",
+           "LongMoySixMetres", "CtrConc", "CtrStop", "%CtrStop",
+           "ActDéfSurfRép", "DistMoyActDéf"]
+
     code = soup.find_all("div", class_="table_container")[6].find_all("th", class_="left")
     code2 = soup.find_all("div", class_="table_container")[6].find_all("td")
     for i in range(len(code)):
@@ -260,7 +271,7 @@ def get_stat_goal(soup):
 
 
 def get_stats_player(soup):
-    
+
     df = get_summary(soup).merge(get_passes(soup), on=['Nom', "Numéro", "Nationalité", "Poste", "Âge", "Minutes", "PassR", "PassT", "%PassR", "PD", "xAG", "PrgP"], how='left')
     df2 = df.merge(get_passes_type(soup), on=['Nom', "Numéro", "Nationalité", "Poste", "Âge", "Minutes", "PassT", "PassR"], how='left')
     df3 = df2.merge(get_defensive_action(soup), on=['Nom', "Numéro", "Nationalité", "Poste", "Âge", "Minutes", "Tcl", "BallContr", "Int"], how='left')
@@ -272,18 +283,19 @@ def get_stats_player(soup):
 
 
 def get_player_database(date_start, date_end, leagues, save, add):
-    t = time.time()
-    links = get_link_matchs(date_start, date_end, leagues, save, add)
+    T = time.time()
+    links = get_link_matchs(date_start, date_end, leagues)
     data = pd.DataFrame()
-    z=0 # Initialisation d'un compteur
-    print("Chargement de la base de données...")
-    print(" ")
-    for link in links:
-        z+=1
+
+    for link in tqdm(links, desc="Extraction des données des matchs", unit="Matchs", colour="green"):
+        t=time.time()
         soup = page(link)
-        print("Chargement : ", round((z/len(links))*100), "%", end="\r") # Affichage du compteur pour indiquer l'évolution du chargement des données
-        info = get_stats_player(soup) # On récupère le vecteur des caractéristiques d'un logement à partir des liens que nous avons récupérés
-        data = pd.concat([data, info]) # On ajoute notre observation au vecteur data qui regroupe toutes les observations
-    
-    print("Extraction terminée en ", round((time.time() - t)/60, 2), "minutes")
+
+        info = get_stats_player(soup)
+        data = pd.concat([data, info])
+
+        while time.time() - t <= 4.1:
+            time.sleep(0.01)
+
+    print("Extraction terminée en ", round((time.time() - T)/60, 2), "minutes")
     return data
