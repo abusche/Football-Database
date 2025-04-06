@@ -58,14 +58,18 @@ def get_actions_match(soup):
 
 
 def get_actions_database(date_start, date_end, leagues, save, add):
-    t = time.time()
+    T = time.time()
     links = get_link_matchs(date_start, date_end, leagues)
-    print("Chargement de la base de données...\n")
     data = pd.DataFrame()
-    for link in tqdm(links):
+
+    for link in tqdm(links, desc="Extraction des données des matchs", unit="Matchs", colour="green"):
+        t = time.time()
         soup = page(link)
         actions_match = get_actions_match(soup)
         data = pd.concat([data, actions_match])
 
-    print("Extraction terminée en ", round((time.time() - t)/60, 2), "minutes")
+        while time.time() - t <= 4.1:
+            time.sleep(0.01)
+
+    print("Extraction terminée en ", round((time.time() - T)/60, 2), "minutes")
     return data
