@@ -5,7 +5,6 @@ from base_functions import get_link_matchs, page
 import time
 from tqdm import tqdm
 
-
 def get_actions_match(soup):
 
     game_actions = []
@@ -15,43 +14,47 @@ def get_actions_match(soup):
     # Team 1
     code = soup.find_all("div", class_="event a")
     for c in code:
-        text = c.text.replace("\n", "").replace("\t", "").replace("\xa0", "").replace("pour", " pour").replace("Passe", " Passe").replace("Tir au but—Substitute"," (Pen)—Goal score ").replace("Tir au but—", " (Pen)—Goal score ")
-        m1 = re.search(r'\d+:\d+', text)
-        m1 = m1.group()
-        reg = re.match(r"([\d+’]+)\d+:\d+([^—]+)—(.+)", text.replace("score", m1))
+        text = c.text.replace("\n", "").replace("\t", "").replace("\xa0", "").replace("pour", " pour").replace("Passe", " - Passe").replace("Tir au but—Substitute"," (Pen)—Goal score ").replace("Tir au but—", " (Pen)—Goal score ").replace("Pénalty arrêté", " - Pénalty arrêté")
+        reg = re.match(r"(\d+\+?\d*[’'])(\d+:\d+)([^—]+)(?:—(.*))?", text)
 
         action_minute = sum([int(x) for x in reg.group(1).replace("’", "").split("+")])
-        action_description = reg.group(2).strip().replace(":", " : ")
+        action_score = reg.group(2).strip()
+        action_description = reg.group(3).strip().replace(":", " : ")
         if "Pénalty arrêté" in action_description:
             action_type = "Pénalty arrêté"
         else:
-            action_type = reg.group(3).strip()
+            action_type = reg.group(4).strip()
+        match1 = re.match(r"([A-Za-z ]+)\s\d+:\d+", action_type)
+        if match1:
+            action_type = match1.group(1).strip()
         action_team = teams[0]
-        action = [action_minute, action_description, action_type, action_team]
+        action = [action_minute, action_score, action_description, action_type, action_team]
 
         game_actions.append(event + action)
 
     # Team 2
     code = soup.find_all("div", class_="event b")
     for c in code:
-        text = c.text.replace("\n", "").replace("\t", "").replace("\xa0", "").replace("pour", " pour").replace("Passe", " Passe").replace("Tir au but—Substitute"," (Pen)—Goal score ").replace("Tir au but—", " (Pen)—Goal score ").replace("Pénalty arrêté", " Pénalty arrêté")
-        m1 = re.search(r'\d+:\d+', text)
-        m1 = m1.group()
-        reg = re.match(r"([\d+’]+)\d+:\d+([^—]+)—(.+)", text.replace("score", m1))
+        text = c.text.replace("\n", "").replace("\t", "").replace("\xa0", "").replace("pour", " pour").replace("Passe", " - Passe").replace("Tir au but—Substitute"," (Pen)—Goal score ").replace("Tir au but—", " (Pen)—Goal score ").replace("Pénalty arrêté", " - Pénalty arrêté")
+        reg = re.match(r"(\d+\+?\d*[’'])(\d+:\d+)([^—]+)(?:—(.*))?", text)
 
         action_minute = sum([int(x) for x in reg.group(1).replace("’", "").split("+")])
-        action_description = reg.group(2).strip().replace(":", " : ")
+        action_score = reg.group(2).strip()
+        action_description = reg.group(3).strip().replace(":", " : ")
         if "Pénalty arrêté" in action_description:
             action_type = "Pénalty arrêté"
         else:
-            action_type = reg.group(3).strip()
+            action_type = reg.group(4).strip()
+        match1 = re.match(r"([A-Za-z ]+)\s\d+:\d+", action_type)
+        if match1:
+            action_type = match1.group(1).strip()
         action_team = teams[1]
-        action = [action_minute, action_description, action_type, action_team]
+        action = [action_minute, action_score, action_description, action_type, action_team]
 
         game_actions.append(event + action)
 
-    columns = ["championnat", "journée", "saison", "date", "heure", "arbitre", "stade", "equipe1", "equipe2", "action_minute", 
-            "action_description", "action_type", "action_team"]
+    columns = ["league", "journey", "season", "date", "hours", "referee", "stadium", "team1", "team2", "action_minute", "action_score",
+               "action_description", "action_type", "action_team"]
     data = pd.DataFrame(game_actions, columns=columns).sort_values(by="action_minute")
     
     return data
@@ -67,7 +70,6 @@ def get_actions_database(date_start, date_end, leagues, save, add):
         soup = page(link)
         actions_match = get_actions_match(soup)
         data = pd.concat([data, actions_match])
-
         while time.time() - t <= 4.1:
             time.sleep(0.01)
 

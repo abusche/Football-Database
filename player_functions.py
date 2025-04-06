@@ -11,24 +11,14 @@ def get_summary(soup):
     var = ["league", "journey", "season", "date", "hours", "referee", "stadium", "team1", "team2", "name","shirtnumber","nationality","position","age","minutes","goals","assists","pens_made",
            "pens_att","shots","shots_on_target","cards_yellow","cards_red","touches","tackles","interceptions","blocks","xg","npxg","xg_assist","sca","gca","passes_completed","passes",
            "passes_pct","progressive_passes","carries","progressive_carries","take_ons","take_ons_won"]
-    
+    index = get_event(soup) + ["NaN"] * 31
     summary = pd.DataFrame(columns=var)
-    event = get_event(soup)
 
     try:
         code = soup.find_all("div", class_="table_container tabbed current")[0].find_all('th', class_="left")
         for i in range(len(code)-2):
-            summary_player = pd.DataFrame(columns=var)
+            summary_player = pd.DataFrame([index], columns=var)
             summary_player["name"] = [code[i+1].text]
-            summary_player["league"] = [event[0]]
-            summary_player["journey"] = [event[1]]
-            summary_player["season"] = [event[2]]
-            summary_player["date"] = [event[3]]
-            summary_player["hours"] = [event[4]]
-            summary_player["referee"] = [event[5]]
-            summary_player["stadium"] = [event[6]]
-            summary_player["team1"] = [event[7]]
-            summary_player["team2"] = [event[8]]
             code2 = soup.find_all("div", class_="table_container tabbed current")[0].find_all('tr')[i+2].find_all("td")
             for col in summary_player.columns:
                 for c2 in code2:
@@ -38,17 +28,8 @@ def get_summary(soup):
 
         code = soup.find_all("div", class_="table_container tabbed current")[1].find_all('th', class_="left")
         for i in range(len(code)-2):
-            summary_player = pd.DataFrame(columns=var)
+            summary_player = pd.DataFrame([index], columns=var)
             summary_player["name"] = [code[i+1].text]
-            summary_player["league"] = [event[0]]
-            summary_player["journey"] = [event[1]]
-            summary_player["season"] = [event[2]]
-            summary_player["date"] = [event[3]]
-            summary_player["hours"] = [event[4]]
-            summary_player["referee"] = [event[5]]
-            summary_player["stadium"] = [event[6]]
-            summary_player["team1"] = [event[7]]
-            summary_player["team2"] = [event[8]]
             code2 = soup.find_all("div", class_="table_container tabbed current")[1].find_all('tr')[i+2].find_all("td")
             for col in summary_player.columns:
                 for c2 in code2:
