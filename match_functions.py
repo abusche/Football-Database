@@ -20,39 +20,44 @@ def get_teams_name(soup):
 
 def get_event_details(soup):
 
-    code = soup.find_all("div", class_="scorebox_meta")[0]
+    code = soup.find("div", class_="scorebox_meta")
 
-    league = code.find_all("a")[1].text  # league
-    journey = re.search(r'Journée \d+', code.text).group(0)  # Journée
-    date_obj = dateparser.parse(code.find("a").text, languages=['fr'])
-    date = date_obj.strftime("%d/%m/%Y")  # Date
-    hours = re.sub(r'\s*\([^)]*\)', '',
-                   soup.find_all("span", class_="venuetime")[0].text)  # Hours
+    urls = code.find_all("a")
+    league = urls[1].text  # League
+    raw_date_text = urls[0].text
+    date_obj = dateparser.parse(raw_date_text, languages=['fr'])
+    date_str = date_obj.strftime("%d/%m/%Y")  # Date
 
-    # spectators = "NaN"
-    referee = "NaN"
-
-    for i in range(len(code.find_all("span"))):
-        if "Arbitre" in code.find_all("span")[i].text:
-            referee = code.find_all("span")[i].text.replace("\xa0", " ")
-            referee = referee.replace(" (Arbitre)", "")
-    for i in range(len(code.find_all("small"))):
-        if "Tribune" in code.find_all("small")[i].text:
-            stadium = code.find_all("small")[i+1].text.split(',')[0]
-        # if "Affluence" in code.find_all("small")[i].text:
-        #    spectators = int(code.find_all("small")[i+1].text.replace(",", ""))
-
-    date_obj = datetime.strptime(
-        dateparser.parse(
-            code.find("a").text,
-            languages=['fr']).strftime("%d/%m/%Y"), "%d/%m/%Y")
-
+    # Season
     if date_obj.month >= 7:
-        season = f"{date_obj.year}/{date_obj.year+1}"
+        season = f"{date_obj.year}/{date_obj.year + 1}"
     else:
-        season = f"{date_obj.year-1}/{date_obj.year}"
+        season = f"{date_obj.year - 1}/{date_obj.year}"
 
-    return [league, journey, season, date, hours, referee, stadium]
+    # Journey
+    journey_match = re.search(r'Journée \d+', code.text)
+    journey = journey_match.group(0) if journey_match else "NaN"
+
+    # Hours
+    hours_raw = soup.find("span", class_="venuetime").text
+    hours = re.sub(r'\s*\([^)]*\)', '', hours_raw)
+
+    # Referee
+    referee = "NaN"
+    for span in code.find_all("span"):
+        if "Arbitre" in span.text:
+            referee = span.text.replace("\xa0", " ").replace(" (Arbitre)", "")
+            break
+
+    # Stadium
+    stadium = "NaN"
+    code2 = code.find_all("small")
+    for i, small in enumerate(code2):
+        if "Tribune" in small.text and i + 1 < len(code2):
+            stadium = code2[i + 1].text.split(',')[0]
+            break
+
+    return [league, journey, season, date_str, hours, referee, stadium]
 
 def get_event(soup):
     event = get_event_details(soup) + get_teams_name(soup)
@@ -66,14 +71,22 @@ def get_event(soup):
 
 def get_score(soup):
     code = soup.find_all("div", class_="score")
-    score = [int(c.text) for c in code]
-    return score
+    try:
+        score_home = int(code[0].text)
+        score_away = int(code[1].text)
+    except (IndexError, ValueError):
+        score_home, score_away = "NaN", "NaN" 
+    return {"score_home": score_home, "score_away": score_away}
 
 
 def get_xg(soup):
     code = soup.find_all("div", class_="score_xg")
-    xg = [float(c.text) for c in code]
-    return xg
+    try:
+        xg_home = float(code[0].text)
+        xg_away = float(code[1].text)
+    except (IndexError, ValueError):
+        xg_home, xg_away = "NaN", "NaN" 
+    return {"xg_home": xg_home, "xg_away": xg_away}
 
 
 def get_possession(soup):
