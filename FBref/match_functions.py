@@ -109,7 +109,7 @@ def get_stat_perc(soup):
         for i in range(len(col_name)):
             if col == col_name[i]:
                 stats = code.find_all("td")[i].text.replace("\n", "")
-            
+
                 if "of" in stats:
                     for stat in stats.split("\xa0—\xa0"):
                           if "of" in stat:
@@ -266,7 +266,7 @@ def get_match_database(date_start, date_end, leagues, save, add):
     T = time.time()
 
     links = get_link_matchs(date_start, date_end, leagues)
-    
+
     data = pd.DataFrame()
 
     for link in tqdm(links, desc="Extraction des données des matchs", unit="Matchs", colour="green"):
