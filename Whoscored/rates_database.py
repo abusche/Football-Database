@@ -10,11 +10,15 @@ from selenium.webdriver.support.ui import WebDriverWait
 from bs4 import BeautifulSoup
 from datetime import datetime
 
-def get_whoscored_links(league):
+
+def get_whoscored_links(leagues):
     df = pd.read_csv("urls/clean/links.csv")
     links = []
-    for link in df[df["ligue"] == league].iloc[:, 0].tolist():
-        links.append("https://fr.whoscored.com/" + link)
+    for i in range(len(leagues)):
+        league = list(leagues.keys())[i]
+        pays = leagues[list(leagues.keys())[i]]
+        for link in df[(df["ligue"] == league) & (df["pays"] == pays)].iloc[:, 0].tolist():
+            links.append("https://fr.whoscored.com/" + link)
     return links
 
 
@@ -25,12 +29,12 @@ def get_event(soup):
 
     c = soup.find_all("div", class_="info-block cleared")[2].text.replace("Coup d'envoi:", "").split(", ")
     date_str = c[1]
-    date_obj = datetime.strptime(date_str, '%d-%b-%y')  # Convertir en objet datetime
-    formatted_date = date_obj.strftime('%d/%m/%Y')  # Reformater en "01/03/2025"
+    date_obj = datetime.strptime(date_str, '%d-%b-%y')
+    formatted_date = date_obj.strftime('%d/%m/%Y')
     date = formatted_date
     heure = c[0].split("Date")[0]
     stade = soup.find_all("span", class_="value")[0].text
-    #arbitre = soup.find_all("span", class_="value")[2].text.split(". ")[1]
+    # arbitre = soup.find_all("span", class_="value")[2].text.split(". ")[1]
     affluence = int(soup.find_all("span", class_="value")[1].text.replace(",", ""))
 
     return date, heure, team_dom, team_ext, affluence, stade
@@ -59,24 +63,35 @@ def get_rate(soup, link):
     affluence = [affluence] * n
     stade = [stade] * n
 
-    # Création du DataFrame
-    df_rate = pd.DataFrame({'championnat':championnat, 'saison': saison, 'date': date, 'heure': heure, 'stade':stade, 'Equipe1': team_dom, 'Equipe2': team_ext, 'affluence':affluence, 'joueur': player, 'rate': rate})
+    df_rate = pd.DataFrame({'championnat': championnat, 'saison': saison,
+                            'date': date, 'heure': heure, 'stade': stade,
+                            'Equipe1': team_dom, 'Equipe2': team_ext,
+                            'affluence': affluence, 'joueur': player,
+                            'rate': rate})
 
     return df_rate
 
 
-def get_page_rate(links):
+def get_rates_database():
     options = Options()
-    options.add_argument("--headless")  # Mode headless activé
+    options.add_argument("--headless")
     options.add_argument("--disable-gpu")
     options.add_argument("--no-sandbox")
 
     service = Service(GeckoDriverManager().install())
     driver = webdriver.Firefox(service=service, options=options)
     driver.set_page_load_timeout(30)
-    
+
     rates = pd.DataFrame()
     errors = []
+
+    leagues = {"ligue-1": "france"}  # ,
+#  "laliga":"espagne",
+#  "serie-a":"italie",
+#  "bundesliga":"allemagne",
+#  "premier-league":"angleterre"}
+
+    links = get_whoscored_links(leagues)
 
     try:
         for link in tqdm(links):
@@ -92,7 +107,11 @@ def get_page_rate(links):
             except Exception as e:
                 print(f"❌ Erreur : {e}")
                 errors.append(link)
-        
+    
+    if len(errors) > 0:
+        while len(errors)
+
+
     finally:
         driver.quit()
 
