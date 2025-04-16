@@ -107,10 +107,6 @@ def get_rates_database():
             except Exception as e:
                 print(f"❌ Erreur : {e}")
                 errors.append(link)
-    
-    if len(errors) > 0:
-        while len(errors)
-
 
     finally:
         driver.quit()
