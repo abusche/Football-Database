@@ -15,22 +15,24 @@ def get_summary(soup):
     summary = pd.DataFrame(columns=var)
 
     try:
-        code = soup.find_all("div", class_="table_container tabbed current")[0].find_all('th', class_="left")
-        for i in range(len(code)-2):
+        code = soup.find("div", class_="table_container tabbed current")
+        code1 = code.find_all('th', class_="left")
+        for i in range(len(code1)-2):
             summary_player = pd.DataFrame([index], columns=var)
-            summary_player["name"] = [code[i+1].text]
-            code2 = soup.find_all("div", class_="table_container tabbed current")[0].find_all('tr')[i+2].find_all("td")
+            summary_player["name"] = [code1[i+1].text]
+            code2 = code.find_all('tr')[i+2].find_all("td")
             for col in summary_player.columns:
                 for c2 in code2:
                     if col == c2.get("data-stat"):
                         summary_player[f"{col}"] = [c2.text]
             summary = pd.concat([summary, summary_player])
 
-        code = soup.find_all("div", class_="table_container tabbed current")[1].find_all('th', class_="left")
-        for i in range(len(code)-2):
+        code = soup.find_all("div", class_="table_container tabbed current")[1]
+        code1 = code.find_all('th', class_="left")
+        for i in range(len(code1)-2):
             summary_player = pd.DataFrame([index], columns=var)
-            summary_player["name"] = [code[i+1].text]
-            code2 = soup.find_all("div", class_="table_container tabbed current")[1].find_all('tr')[i+2].find_all("td")
+            summary_player["name"] = [code1[i+1].text]
+            code2 = code.find_all('tr')[i+2].find_all("td")
             for col in summary_player.columns:
                 for c2 in code2:
                     if col == c2.get("data-stat"):
@@ -49,22 +51,24 @@ def get_passes(soup):
 
     passes = pd.DataFrame(columns=var)
     try:
-        code = soup.find_all("div", class_="table_container tabbed")[0].find_all('th', class_="left")
-        for i in range(len(code)-2):
+        code = soup.find_all("div", class_="table_container tabbed")[0]
+        code1 = code.find_all('th', class_="left")
+        for i in range(len(code1)-2):
             passes_player = pd.DataFrame(columns=var)
-            passes_player["name"] = [code[i+1].text]
-            code2 = soup.find_all("div", class_="table_container tabbed")[0].find_all('tr')[i+2].find_all("td")
+            passes_player["name"] = [code1[i+1].text]
+            code2 = code.find_all('tr')[i+2].find_all("td")
             for col in passes_player.columns:
                 for c2 in code2:
                     if col == c2.get("data-stat"):
                         passes_player[f"{col}"] = [c2.text]
             passes = pd.concat([passes, passes_player])
 
-        code = soup.find_all("div", class_="table_container tabbed")[5].find_all('th', class_="left")
-        for i in range(len(code)-2):
+        code = soup.find_all("div", class_="table_container tabbed")[5]
+        code1 = code.find_all('th', class_="left")
+        for i in range(len(code1)-2):
             passes_player = pd.DataFrame(columns=var)
-            passes_player["name"] = [code[i+1].text]
-            code2 = soup.find_all("div", class_="table_container tabbed")[5].find_all('tr')[i+2].find_all("td")
+            passes_player["name"] = [code1[i+1].text]
+            code2 = code.find_all('tr')[i+2].find_all("td")
             for col in passes_player.columns:
                 for c2 in code2:
                     if col == c2.get("data-stat"):
@@ -83,22 +87,24 @@ def get_passes_type(soup):
 
     passes = pd.DataFrame(columns=var)
     try:
-        code = soup.find_all("div", class_="table_container tabbed")[1].find_all('th', class_="left")
-        for i in range(len(code)-2):
+        code = soup.find_all("div", class_="table_container tabbed")[1]
+        code1 = code.find_all('th', class_="left")
+        for i in range(len(code1)-2):
             passes_player = pd.DataFrame(columns=var)
-            passes_player["name"] = [code[i+1].text]
-            code2 = soup.find_all("div", class_="table_container tabbed")[1].find_all('tr')[i+2].find_all("td")
+            passes_player["name"] = [code1[i+1].text]
+            code2 = code.find_all('tr')[i+2].find_all("td")
             for col in passes_player.columns:
                 for c2 in code2:
                     if col == c2.get("data-stat"):
                         passes_player[f"{col}"] = [c2.text]
             passes = pd.concat([passes, passes_player])
 
-        code = soup.find_all("div", class_="table_container tabbed")[6].find_all('th', class_="left")
+        code = soup.find_all("div", class_="table_container tabbed")[6]
+        code1 = code.find_all('th', class_="left")
         for i in range(len(code)-2):
             passes_player = pd.DataFrame(columns=var)
             passes_player["name"] = [code[i+1].text]
-            code2 = soup.find_all("div", class_="table_container tabbed")[6].find_all('tr')[i+2].find_all("td")
+            code2 = code.find_all('tr')[i+2].find_all("td")
             for col in passes_player.columns:
                 for c2 in code2:
                     if col == c2.get("data-stat"):
@@ -117,22 +123,24 @@ def get_defensive_action(soup):
 
     passes = pd.DataFrame(columns=var)
     try:
-        code = soup.find_all("div", class_="table_container tabbed")[2].find_all('th', class_="left")
-        for i in range(len(code)-2):
+        code = soup.find_all("div", class_="table_container tabbed")[2]
+        code1 = code.find_all('th', class_="left")
+        for i in range(len(code1)-2):
             passes_player = pd.DataFrame(columns=var)
-            passes_player["name"] = [code[i+1].text]
-            code2 = soup.find_all("div", class_="table_container tabbed")[2].find_all('tr')[i+2].find_all("td")
+            passes_player["name"] = [code1[i+1].text]
+            code2 = code.find_all('tr')[i+2].find_all("td")
             for col in passes_player.columns:
                 for c2 in code2:
                     if col == c2.get("data-stat"):
                         passes_player[f"{col}"] = [c2.text]
             passes = pd.concat([passes, passes_player])
 
-        code = soup.find_all("div", class_="table_container tabbed")[7].find_all('th', class_="left")
-        for i in range(len(code)-2):
+        code = soup.find_all("div", class_="table_container tabbed")[7]
+        code1 = code.find_all('th', class_="left")
+        for i in range(len(code1)-2):
             passes_player = pd.DataFrame(columns=var)
-            passes_player["name"] = [code[i+1].text]
-            code2 = soup.find_all("div", class_="table_container tabbed")[7].find_all('tr')[i+2].find_all("td")
+            passes_player["name"] = [code1[i+1].text]
+            code2 = code.find_all('tr')[i+2].find_all("td")
             for col in passes_player.columns:
                 for c2 in code2:
                     if col == c2.get("data-stat"):
@@ -153,22 +161,24 @@ def get_possession(soup):
 
     passes = pd.DataFrame(columns=var)
     try:
-        code = soup.find_all("div", class_="table_container tabbed")[3].find_all('th', class_="left")
-        for i in range(len(code)-2):
+        code = soup.find_all("div", class_="table_container tabbed")[3]
+        code1 = code.find_all('th', class_="left")
+        for i in range(len(code1)-2):
             passes_player = pd.DataFrame(columns=var)
-            passes_player["name"] = [code[i+1].text]
-            code2 = soup.find_all("div", class_="table_container tabbed")[3].find_all('tr')[i+2].find_all("td")
+            passes_player["name"] = [code1[i+1].text]
+            code2 = code.find_all('tr')[i+2].find_all("td")
             for col in passes_player.columns:
                 for c2 in code2:
                     if col == c2.get("data-stat"):
                         passes_player[f"{col}"] = [c2.text]
             passes = pd.concat([passes, passes_player])
 
-        code = soup.find_all("div", class_="table_container tabbed")[8].find_all('th', class_="left")
-        for i in range(len(code)-2):
+        code = soup.find_all("div", class_="table_container tabbed")[8]
+        code1 = code.find_all('th', class_="left")
+        for i in range(len(code1)-2):
             passes_player = pd.DataFrame(columns=var)
-            passes_player["name"] = [code[i+1].text]
-            code2 = soup.find_all("div", class_="table_container tabbed")[8].find_all('tr')[i+2].find_all("td")
+            passes_player["name"] = [code1[i+1].text]
+            code2 = code.find_all('tr')[i+2].find_all("td")
             for col in passes_player.columns:
                 for c2 in code2:
                     if col == c2.get("data-stat"):
@@ -185,22 +195,24 @@ def get_divers_stats(soup):
 
     passes = pd.DataFrame(columns=var)
     try:
-        code = soup.find_all("div", class_="table_container tabbed")[4].find_all('th', class_="left")
-        for i in range(len(code)-2):
+        code = soup.find_all("div", class_="table_container tabbed")[4]
+        code1 = code.find_all('th', class_="left")
+        for i in range(len(code1)-2):
             passes_player = pd.DataFrame(columns=var)
-            passes_player["name"] = [code[i+1].text]
-            code2 = soup.find_all("div", class_="table_container tabbed")[4].find_all('tr')[i+2].find_all("td")
+            passes_player["name"] = [code1[i+1].text]
+            code2 = code.find_all('tr')[i+2].find_all("td")
             for col in passes_player.columns:
                 for c2 in code2:
                     if col == c2.get("data-stat"):
                         passes_player[f"{col}"] = [c2.text]
             passes = pd.concat([passes, passes_player])
 
-        code = soup.find_all("div", class_="table_container tabbed")[9].find_all('th', class_="left")
-        for i in range(len(code)-2):
+        code = soup.find_all("div", class_="table_container tabbed")[9]
+        code1 = code.find_all('th', class_="left")
+        for i in range(len(code1)-2):
             passes_player = pd.DataFrame(columns=var)
-            passes_player["name"] = [code[i+1].text]
-            code2 = soup.find_all("div", class_="table_container tabbed")[9].find_all('tr')[i+2].find_all("td")
+            passes_player["name"] = [code1[i+1].text]
+            code2 = code.find_all('tr')[i+2].find_all("td")
             for col in passes_player.columns:
                 for c2 in code2:
                     if col == c2.get("data-stat"):
@@ -223,22 +235,24 @@ def get_stat_goal(soup):
     GK = pd.DataFrame(columns=var)
 
     try:
-        code = soup.find_all("div", class_="table_container")[6].find_all("th", class_="left")[1:]
-        code2 = soup.find_all("div", class_="table_container")[6].find_all("td")
-        for i in range(len(code)):
+        code = soup.find_all("div", class_="table_container")[6]
+        code1 = code.find_all("th", class_="left")[1:]
+        code2 = code.find_all("td")
+        for i in range(len(code1)):
             GK_player = pd.DataFrame(columns=var)
-            GK_player["name"] = [code[i].text]
+            GK_player["name"] = [code1[i].text]
             for col in GK_player.columns:
                 for c2 in code2:
                     if col == c2.get("data-stat"):
                         GK_player[f"{col}"] = [c2.text]
             GK = pd.concat([GK, GK_player])
             
-        code = soup.find_all("div", class_="table_container")[13].find_all("th", class_="left")[1:]
-        code2 = soup.find_all("div", class_="table_container")[13].find_all("td")
-        for i in range(len(code)):
+        code = soup.find_all("div", class_="table_container")[13]
+        code1 = code.find_all("th", class_="left")[1:]
+        code2 = code.find_all("td")
+        for i in range(len(code1)):
             GK_player = pd.DataFrame(columns=var)
-            GK_player["name"] = [code[i].text]
+            GK_player["name"] = [code1[i].text]
             for col in GK_player.columns:
                 for c2 in code2:
                     if col == c2.get("data-stat"):
@@ -261,7 +275,7 @@ def get_stats_player(soup):
     return df6
 
 
-def get_player_database(date_start, date_end, leagues, save, add):
+def get_player_database(date_start, date_end, leagues):
     T = time.time()
     links = get_link_matchs(date_start, date_end, leagues)
     data = pd.DataFrame()

@@ -26,7 +26,7 @@ def get_shoot(soup):
         return data
 
 
-def get_shoot_database(date_start, date_end, leagues, save, add):
+def get_shoot_database(date_start, date_end, leagues):
     T = time.time()
     links = get_link_matchs(date_start, date_end, leagues)
     data = pd.DataFrame()
