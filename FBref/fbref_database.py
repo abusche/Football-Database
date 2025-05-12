@@ -8,18 +8,29 @@ from datetime import datetime, timedelta
 import time
 import pandas as pd
 from tqdm import tqdm
+import ace_tools_open as tools
 
-def get_database(date_start, date_end, leagues, folder):
+def get_database(date_start, date_end, new):
     
     T = time.time()
+
+    folder="data"
+    leagues = ["Ligue 1"]
+
     errors = []
     
     links = get_link_matchs(date_start, date_end, leagues)
     
-    matchs = pd.DataFrame()
-    players = pd.DataFrame()
-    shoots = pd.DataFrame()
-    actions = pd.DataFrame()
+    if new == True:
+        matchs = pd.DataFrame()
+        players = pd.DataFrame()
+        shoots = pd.DataFrame()
+        actions = pd.DataFrame()
+    if new == False:
+        matchs = pd.read_csv(f"{folder}/matchs.csv")
+        players = pd.read_csv(f"{folder}/players.csv")
+        shoots = pd.read_csv(f"{folder}/shoots.csv")
+        actions = pd.read_csv(f"{folder}/actions.csv")
 
     for link in tqdm(links, desc="Extraction des données des matchs", unit="Matchs", colour="green"):
         try:
@@ -57,16 +68,20 @@ def get_database(date_start, date_end, leagues, folder):
     print("Extraction terminée en ", round((time.time() - T)/60, 2), "minutes")
 
 
-def update(leagues, folder = "data"):
+def update():
 
     T = time.time()
+
+    folder = "data"
+    leagues = ["Ligue 1"]
 
     matchs = pd.read_csv(f"{folder}/matchs.csv")
     players = pd.read_csv(f"{folder}/players.csv")
     shoots = pd.read_csv(f"{folder}/shoots.csv")
     actions = pd.read_csv(f"{folder}/actions.csv")
     
-    last_date = pd.to_datetime(pd.read_csv(f"data/matchs.csv")['date'], format='%d/%m/%Y').max().strftime('%d/%m/%Y').split("/")
+
+    last_date = pd.to_datetime(matchs[matchs["leagues"].isin(leagues)]['date'], format='%d/%m/%Y').max().strftime('%d/%m/%Y').split("/")
     date_str = last_date[2] + "-" + last_date[1] + "-" + last_date[0]
     last_date = datetime.strptime(date_str, "%Y-%m-%d") + timedelta(days=1)
     date_start = last_date.strftime("%Y-%m-%d")
@@ -104,3 +119,22 @@ def update(leagues, folder = "data"):
     actions.to_csv(f"{folder}/actions.csv", index=False)
 
     print("Extraction terminée en ", round((time.time() - T)/60, 2), "minutes")
+
+
+def show_database():
+
+    matchs = pd.read_csv("data/matchs.csv")
+
+    leagues = list(matchs['leagues'].unique())
+
+    max = pd.to_datetime(matchs[matchs["leagues"].isin(leagues)]['date'], format='%d/%m/%Y').max().strftime('%d/%m/%Y')
+    min = pd.to_datetime(matchs[matchs["leagues"].isin(leagues)]['date'], format='%d/%m/%Y').min().strftime('%d/%m/%Y')
+
+    print(leagues)
+    print(min, "-", max)
+    print("Nombre de matchs :", len(matchs), "\n\n")
+
+    tools.display_dataframe_to_user("Matches :", pd.read_csv("data/matchs.csv"))
+    tools.display_dataframe_to_user("Players :", pd.read_csv("data/players.csv"))
+    tools.display_dataframe_to_user("Shoots :", pd.read_csv("data/shoots.csv"))
+    tools.display_dataframe_to_user("Actions :", pd.read_csv("data/actions.csv"))

@@ -182,6 +182,35 @@ def traitement(links_batch, all_matches, all_not_availables, all_errors):
     return all_matches, all_not_availables, all_errors, nb_links, nb_not_availables, nb_errors
 
 
+
+def clean_links(message = False):
+    path = "urls/raw/"
+    all_matches = pd.read_csv(f"{path}links.csv")
+    try:
+        all_errors = pd.read_csv(f"{path}errors.csv")
+    except:
+        all_errors = pd.DataFrame(columns=["link"])
+    all_not_availables = pd.read_csv(f"{path}not_availables.csv")
+
+    nb_links_raw = len(all_matches["link"])
+    nb_not_availables_raw = len(all_not_availables["link"])
+    nb_errors_raw = len(all_errors["link"])
+
+    all_matches = whoscored_link_traitement(all_matches)
+    all_not_availables = whoscored_not_available_error_traitement(all_not_availables)
+    all_errors = whoscored_not_available_error_traitement(all_errors)
+
+    if message == True:
+        print("Nouveaux liens traités :", len(all_matches["link"]) - nb_links_raw)
+        print("Nouveaux liens traités pas applicables :", len(all_not_availables["link"]) - nb_not_availables_raw)
+        print("Nouvelles erreurs :", len(all_errors["link"]) - nb_errors_raw)
+
+    all_matches.to_csv("urls/clean/links.csv", index=False)
+    all_errors.to_csv("urls/clean/errors.csv", index=False)
+    all_not_availables.to_csv("urls/clean/not_availables.csv", index=False)
+
+
+
 def get_link_whoscored(range_down, range_up, new = True):
     path = "urls/raw/"
     number_list = list(range(range_down, range_up + 1))
@@ -217,13 +246,7 @@ def get_link_whoscored(range_down, range_up, new = True):
     print("Erreurs :", nb_errors)
 
     # Clean part
-    all_matches = whoscored_link_traitement(all_matches)
-    all_not_availables = whoscored_not_available_error_traitement(all_not_availables)
-    all_errors = whoscored_not_available_error_traitement(all_errors)
-
-    all_matches.to_csv("urls/clean/links.csv", index=False)
-    all_errors.to_csv("urls/clean/errors.csv", index=False)
-    all_not_availables.to_csv("urls/clean/not_availables.csv", index=False)
+    clean_links()
 
     # Traitement des erreurs
     nb_error = len(all_errors)
@@ -260,13 +283,7 @@ def error_traitement():
     all_not_availables.to_csv(f"{path}not_availables.csv", index=False)
 
     # Clean part
-    all_matches = whoscored_link_traitement(all_matches)
-    all_not_availables = whoscored_not_available_error_traitement(all_not_availables)
-    all_errors = whoscored_not_available_error_traitement(all_errors)
-
-    all_matches.to_csv("urls/clean/links.csv", index=False)
-    all_errors.to_csv("urls/clean/errors.csv", index=False)
-    all_not_availables.to_csv("urls/clean/not_availables.csv", index=False)
+    clean_links()
 
 
 def update_link(num, order):
@@ -278,8 +295,8 @@ def update_link(num, order):
     except:
         all_errors = pd.DataFrame(columns=["link"])
     
-    ma = max([int(all_matches["num_lien"].max()), float(all_not_availables["num_lien"].max())])
-    mi = min([int(all_matches["num_lien"].min()), float(all_not_availables["num_lien"].min())])
+    ma = int(max([int(all_matches["num_lien"].max()), float(all_not_availables["num_lien"].max())]))
+    mi = int(min([int(all_matches["num_lien"].min()), float(all_not_availables["num_lien"].min())]))
 
     number_list = []
     if order == "asc":
@@ -295,13 +312,7 @@ def update_link(num, order):
     print("Non Applicables :", nb_not_availables)
     print("Erreurs :", nb_errors)
 
-    all_matches = whoscored_link_traitement(all_matches)
-    all_not_availables = whoscored_not_available_error_traitement(all_not_availables)
-    all_errors = whoscored_not_available_error_traitement(all_errors)
-
-    all_matches.to_csv("urls/clean/links.csv", index=False)
-    all_errors.to_csv("urls/clean/errors.csv", index=False)
-    all_not_availables.to_csv("urls/clean/not_availables.csv", index=False)
+    clean_links()
 
 
 
@@ -328,13 +339,27 @@ def show_links():
     except:
         error = pd.DataFrame()
 
+    links_raw = pd.read_csv("urls/raw/links.csv")
+    not_available_raw = pd.read_csv("urls/raw/not_availables.csv")
+    try:
+        error_raw = pd.read_csv("urls/raw/errors.csv")
+    except:
+        error = pd.DataFrame()
+
+    print("Données transformées :")
     print("Intervalle des données :", int(links["num_lien"].min()), max([int(links["num_lien"].max()), float(not_available["num_lien"].max())]))
     print("Links :", len(links["num_lien"]))
     print("Not availables :", len(not_available["num_lien"]))
     print("Errors :", len(error["num_lien"]))
-    print("Nombre d'observation :", len(links) + len(not_available))
-    print("\n")
-    tools.display_dataframe_to_user("Links :", links)
-    tools.display_dataframe_to_user("Not availables :", not_available)
+    print("Nombre d'observation :", len(links) + len(not_available),"\n")
+
+    print("Données brutes :")
+    print("Intervalle des données :", int(links_raw["num_lien"].min()), max([int(links_raw["num_lien"].max()), float(not_available_raw["num_lien"].max())]))
+    print("Links :", len(links_raw["num_lien"]))
+    print("Not availables :", len(not_available_raw["num_lien"]))
+    print("Errors :", len(error_raw["link"]))
+    print("Nombre d'observation :", len(links_raw) + len(not_available_raw),"\n")
+    tools.display_dataframe_to_user("Links :", links_raw)
+    tools.display_dataframe_to_user("Not availables :", not_available_raw)
     tools.display_dataframe_to_user("Errors :", error)
-    tools.display_dataframe_to_user("NA's :", links[links["num_lien"].isna()])
+    tools.display_dataframe_to_user("NA's :", links[links_raw["num_lien"].isna()])
