@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-import functools
+# import functools
 import time
 import requests
 from bs4 import BeautifulSoup
@@ -7,8 +7,8 @@ from tqdm import tqdm
 import random
 import cloudscraper
 
-""""
-@functools.cache
+"""
+#@functools.cache
 def page_old(urlpage):
     user_agent = {
         'User-Agent':
@@ -20,29 +20,34 @@ def page_old(urlpage):
     return soup
 """
 
+
 def page(urlpage):
     """
     Récupération du HTML d'un site internet en prenant des précautions contre le blocage.
     """
+
+    # On définit des user_agents différents pour éviter de se faire bloquer
     user_agents = [
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:122.0) Gecko/20100101 Firefox/122.0',
         'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
         'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36'
     ]
+
+    # Initialisation du scraper
     headers = {'User-Agent': random.choice(user_agents)}
     time.sleep(random.random())
     scraper = cloudscraper.create_scraper()
-    
+
+    # Récupération du HTML
     try:
         res = scraper.get(urlpage, headers=headers, timeout=100)
         res.raise_for_status()
+        soup = BeautifulSoup(res.text, 'html.parser')
+        return soup
+
     except Exception as e:
         print(f"❌ Erreur lors de la récupération de la page : {e}")
         return None
-
-    soup = BeautifulSoup(res.text, 'html.parser')
-
-    return soup
 
 
 def gen_link_day(date_start, date_end):
@@ -54,11 +59,12 @@ def gen_link_day(date_start, date_end):
 
     while current_date <= end_date:
         date_str = current_date.strftime('%Y-%m-%d')
-        url = f"https://fbref.com/fr/matchs/{date_str}"
+        url = f"https://fbref.com/en/matchs/{date_str}"
         links_day.append(url)
         current_date += timedelta(days=1)
 
-    return links_day 
+    return links_day
+
 
 """
 def get_link_matchs(date_start, date_end, leagues):
@@ -110,10 +116,10 @@ def get_link_matchs(date_start, date_end, leagues):
                         href = k.get("href")
                         if "matchs" in href and "Rapport de match" in k.text:
                             links.append('https://fbref.com' + k.get("href"))
-    
+
         while time.time() - t <= 4.1:
             time.sleep(0.01)
-        
+
     return links
 """
 
@@ -135,10 +141,10 @@ def get_link_matchs(date_start, date_end, leagues):
                         m = match.find_all("a")
                         for k in m:
                             href = k.get("href")
-                            if "matchs" in href and "Rapport de match" in k.text:
+                            if "matches" in href and "Match Report" in k.text:
                                 links.append('https://fbref.com' + k.get("href"))
 
-            while time.time() - t <= 4.1:
+            while time.time() - t <= 10:
                 time.sleep(0.01)
 
             pbar.set_postfix({"Matchs trouvés": len(matchs), "Nombre total de matchs": len(links)})

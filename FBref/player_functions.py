@@ -287,7 +287,7 @@ def get_player_database(date_start, date_end, leagues):
         info = get_stats_player(soup)
         data = pd.concat([data, info])
 
-        while time.time() - t <= 4.1:
+        while time.time() - t <= 10:
             time.sleep(0.01)
 
     print("Extraction terminée en ", round((time.time() - T)/60, 2), "minutes")

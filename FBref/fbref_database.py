@@ -10,12 +10,9 @@ import pandas as pd
 from tqdm import tqdm
 import ace_tools_open as tools
 
-def get_database(date_start, date_end, new):
+def get_database(date_start, date_end, new, leagues = ["Ligue 1"], folder = "data"):
     
     T = time.time()
-
-    folder="data"
-    leagues = ["Ligue 1"]
 
     errors = []
     
@@ -55,7 +52,7 @@ def get_database(date_start, date_end, new):
             print(e)
             errors.append(link)
 
-        while time.time() - t <= 4.1:
+        while time.time() - t <= 10:
             time.sleep(0.01)
 
     errors = pd.DataFrame(errors)
@@ -110,7 +107,7 @@ def update():
         action = pd.concat([a, pd.DataFrame([link]*len(a), columns=["link"])], axis=1)
         actions = pd.concat([actions, action])
 
-        while time.time() - t <= 4.1:
+        while time.time() - t <= 10:
             time.sleep(0.01)
 
     matchs.to_csv(f"{folder}/matchs.csv", index=False)

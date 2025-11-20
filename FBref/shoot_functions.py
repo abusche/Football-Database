@@ -37,7 +37,7 @@ def get_shoot_database(date_start, date_end, leagues):
         shoot_match = get_shoot(soup)
         data = pd.concat([data, shoot_match])
 
-        while time.time() - t <= 4.1:
+        while time.time() - t <= 10:
             time.sleep(0.01)
 
     print("Extraction terminée en ", round((time.time() - T)/60, 2), "minutes")

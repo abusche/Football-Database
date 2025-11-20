@@ -14,7 +14,7 @@ from base_functions import get_link_matchs, page
 
 def get_teams_name(soup):
     code = soup.find("div", class_="scorebox").find_all("a")
-    teams_name = [c.text for c in code if "equipes" in c.get("href")]
+    teams_name = [c.text for c in code if "squads" in c.get("href")]
     return teams_name
 
 
@@ -25,7 +25,7 @@ def get_event_details(soup):
     urls = code.find_all("a")
     league = urls[1].text  # League
     raw_date_text = urls[0].text
-    date_obj = dateparser.parse(raw_date_text, languages=['fr'])
+    date_obj = dateparser.parse(raw_date_text, languages=['en'])
     date_str = date_obj.strftime("%d/%m/%Y")  # Date
 
     # Season
@@ -35,7 +35,7 @@ def get_event_details(soup):
         season = f"{date_obj.year - 1}/{date_obj.year}"
 
     # Journey
-    journey_match = re.search(r'Journée \d+', code.text)
+    journey_match = re.search(r'Matchweek \d+', code.text)
     journey = journey_match.group(0) if journey_match else "NaN"
 
     # Hours
@@ -45,15 +45,15 @@ def get_event_details(soup):
     # Referee
     referee = "NaN"
     for span in code.find_all("span"):
-        if "Arbitre" in span.text:
-            referee = span.text.replace("\xa0", " ").replace(" (Arbitre)", "")
+        if "Referee" in span.text:
+            referee = span.text.replace("\xa0", " ").replace(" (Referee)", "")
             break
 
     # Stadium
     stadium = "NaN"
     small_tags = code.find_all("small")
     for i, small in enumerate(small_tags):
-        if "Tribune" in small.text and i + 1 < len(small_tags):
+        if "Venue" in small.text and i + 1 < len(small_tags):
             stadium = small_tags[i + 1].text.split(',')[0]
             break
 
@@ -92,10 +92,10 @@ def get_xg(soup):
 
 def get_stat_perc(soup):
 
-    data = pd.DataFrame(columns=['Possession_home', 'Possession_away', 'S_Pourcentage de passes réussies_home', 'SR_Pourcentage de passes réussies_home', 'Pourcentage de passes réussies_home', 
-                                 'S_Pourcentage de passes réussies_away', 'SR_Pourcentage de passes réussies_away', 'Pourcentage de passes réussies_away', 
-                                 'S_Tirs cadrés_home', 'SR_Tirs cadrés_home', 'Tirs cadrés_home', 'S_Tirs cadrés_away', 'SR_Tirs cadrés_away', 'Tirs cadrés_away', 
-                                 'S_Arrêts_home', 'SR_Arrêts_home', 'Arrêts_home', 'S_Arrêts_away', 'SR_Arrêts_away', 'Arrêts_away'])
+    data = pd.DataFrame(columns=['Possession_home', 'Possession_away', 'S_Passing Accuracy_home', 'SR_Passing Accuracy_home', 'Passing Accuracy_home', 
+                                 'S_Passing Accuracy_away', 'SR_Passing Accuracy_away', 'Passing Accuracy_away', 
+                                 'S_Shots on Target_home', 'SR_Shots on Target_home', 'Shots on Target_home', 'S_Shots on Target_away', 'SR_Shots on Target_away', 'Shots on Target_away', 
+                                 'S_Saves_home', 'SR_Saves_home', 'Saves_home', 'S_Saves_away', 'SR_Saves_away', 'Saves_away'])
 
     code = soup.find('div', id='team_stats')
 
@@ -133,25 +133,25 @@ def get_stat_perc(soup):
 
 
 def get_details_stats(soup):
-    stats = pd.DataFrame(columns=['Fautes_home', 'Fautes_away', 'Corners_home', 'Corners_away', 'Centres_home', 'Centres_away', 'Touches_home', 'Touches_away', 'Tacles_home', 'Tacles_away', 'Interceptions_home', 'Interceptions_away', 'Duels aériens gagnés_home',
-                                     'Duels aériens gagnés_away', 'Dégagements_home', 'Dégagements_away', 'Hors-jeux_home', 'Hors-jeux_away', 'Dégagements au six mètres_home', 'Dégagements au six mètres_away', 'Rentrée de touche_home', 'Rentrée de touche_away', 
-                                     'Longs ballons_home', 'Longs ballons_away'])
+    stats = pd.DataFrame(columns=['Fouls_home', 'Fouls_away', 'Corners_home', 'Corners_away', 'Crosses_home', 'Crosses_away', 'Touches_home', 'Touches_away', 'Tackles_home', 'Tackles_away', 
+                                  'Interceptions_home', 'Interceptions_away', 'Aerials Won_home', 'Aerials Won_away', 'Clearances_home', 'Clearances_away', 'Offsides_home', 'Offsides_away',
+                                  'Goal Kicks_home', 'Goal Kicks_away', 'Throw Ins_home', 'Throw Ins_away', 'Long Balls_home', 'Long Balls_away'])
 
     code = soup.find_all('div', id='team_stats_extra')[0].find_all("div")
 
     stats_patterns = {
-        "Fautes": r'(\d+)\s*Fautes\s*(\d+)',
+        "Fouls": r'(\d+)\s*Fouls\s*(\d+)',
         "Corners": r'(\d+)\s*Corners\s*(\d+)',
-        "Centres": r'(\d+)\s*Centres\s*(\d+)',
+        "Crosses": r'(\d+)\s*Crosses\s*(\d+)',
         "Touches": r'(\d+)\s*Touches\s*(\d+)',
-        "Tacles": r'(\d+)\s*Tacles\s*(\d+)',
+        "Tackles": r'(\d+)\s*Tackles\s*(\d+)',
         "Interceptions": r'(\d+)\s*Interceptions\s*(\d+)',
-        "Duels aériens gagnés": r'(\d+)\s*Duels aériens gagnés\s*(\d+)',
-        "Dégagements": r'(\d+)\s*Dégagements\s*(\d+)',
-        "Hors-jeux": r'(\d+)\s*Hors-jeux\s*(\d+)',
-        "Dégagements au six mètres": r'(\d+)\s*Dégagements au six mètres\s*(\d+)',
-        "Rentrée de touche": r'(\d+)\s*Rentrée de touche\s*(\d+)',
-        "Longs ballons": r'(\d+)\s*Longs ballons\s*(\d+)'
+        "Aerials Won": r'(\d+)\s*Aerials Won\s*(\d+)',
+        "Clearances": r'(\d+)\s*Clearances\s*(\d+)',
+        "Offsides": r'(\d+)\s*Offsides\s*(\d+)',
+        "Goal Kicks": r'(\d+)\s*Goal Kicks\s*(\d+)',
+        "Throw Ins": r'(\d+)\s*Throw Ins\s*(\d+)',
+        "Long Balls": r'(\d+)\s*Long Balls\s*(\d+)'
     }
 
     for div in code:
@@ -213,16 +213,16 @@ def get_coach(soup):
     coach = [
         c.text.replace("\xa0", " ").split(": ")[1]
         for c in code
-        if "Entraineur" in c.text.replace("\xa0", " ").split(": ")[0]
+        if "Manager" in c.text.replace("\xa0", " ").split(": ")[0]
     ]
 
     capitaine = [
         c.text.replace("\xa0", " ").split(": ")[1]
         for c in code
-        if "Capitaine" in c.text.replace("\xa0", " ").split(": ")[0]
+        if "Captain" in c.text.replace("\xa0", " ").split(": ")[0]
     ]
 
-    return pd.DataFrame([coach + capitaine], columns=["Entraineur_home", "Entraineur_away", "Capitaine_home", "Capitaine_away"])
+    return pd.DataFrame([coach + capitaine], columns=["Manager_home", "Manager_away", "Captain_home", "Captain_away"])
 
 
 def get_compo(soup):
@@ -274,7 +274,7 @@ def get_match_database(date_start, date_end, leagues, save, add):
         soup = page(link)
         match = pd.concat([get_match(soup), pd.DataFrame([link], columns=["link"])], axis=1)
         data = pd.concat([data, match])
-        while time.time() - t <= 4.1:
+        while time.time() - t <= 10:
             time.sleep(0.01)
 
     print("Extraction terminée en ", round((time.time() - T)/60, 2), "minutes")

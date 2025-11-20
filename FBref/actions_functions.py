@@ -14,14 +14,14 @@ def get_actions_match(soup):
     # Team 1
     code = soup.find_all("div", class_="event a")
     for c in code:
-        text = c.text.replace("\n", "").replace("\t", "").replace("\xa0", "").replace("pour", " pour").replace("Passe", " - Passe").replace("Tir au but—Substitute"," (Pen)—Goal score ").replace("Tir au but—", " (Pen)—Goal score ").replace("Pénalty arrêté", " - Pénalty arrêté")
+        text = c.text.replace("\n", "").replace("\t", "").replace("\xa0", "").replace("for", " for").replace("Assist", " - Assist").replace("Tir au but—Substitute"," (Pen)—Goal score ").replace("Penalty Kick—", " (Pen)—Goal score ").replace("Penalty saved", " - Penalty saved")
         reg = re.match(r"(\d+\+?\d*[’'])(\d+:\d+)([^—]+)(?:—(.*))?", text)
 
         action_minute = sum([int(x) for x in reg.group(1).replace("’", "").split("+")])
         action_score = reg.group(2).strip()
         action_description = reg.group(3).strip().replace(":", " : ")
-        if "Pénalty arrêté" in action_description:
-            action_type = "Pénalty arrêté"
+        if "Penalty saved" in action_description:
+            action_type = "Penalty saved"
         else:
             action_type = reg.group(4).strip()
         match1 = re.match(r"([A-Za-z ]+)\s\d+:\d+", action_type)
@@ -35,14 +35,14 @@ def get_actions_match(soup):
     # Team 2
     code = soup.find_all("div", class_="event b")
     for c in code:
-        text = c.text.replace("\n", "").replace("\t", "").replace("\xa0", "").replace("pour", " pour").replace("Passe", " - Passe").replace("Tir au but—Substitute"," (Pen)—Goal score ").replace("Tir au but—", " (Pen)—Goal score ").replace("Pénalty arrêté", " - Pénalty arrêté")
+        text = c.text.replace("\n", "").replace("\t", "").replace("\xa0", "").replace("for", " for").replace("Assist", " - Assist").replace("Tir au but—Substitute"," (Pen)—Goal score ").replace("Penalty Kick—", " (Pen)—Goal score ").replace("Penalty saved", " - Penalty saved")
         reg = re.match(r"(\d+\+?\d*[’'])(\d+:\d+)([^—]+)(?:—(.*))?", text)
 
         action_minute = sum([int(x) for x in reg.group(1).replace("’", "").split("+")])
         action_score = reg.group(2).strip()
         action_description = reg.group(3).strip().replace(":", " : ")
-        if "Pénalty arrêté" in action_description:
-            action_type = "Pénalty arrêté"
+        if "Penalty saved" in action_description:
+            action_type = "Penalty saved"
         else:
             action_type = reg.group(4).strip()
         match1 = re.match(r"([A-Za-z ]+)\s\d+:\d+", action_type)
@@ -70,7 +70,7 @@ def get_actions_database(date_start, date_end, leagues, save, add):
         soup = page(link)
         actions_match = get_actions_match(soup)
         data = pd.concat([data, actions_match])
-        while time.time() - t <= 4.1:
+        while time.time() - t <= 10:
             time.sleep(0.01)
 
     print("Extraction terminée en ", round((time.time() - T)/60, 2), "minutes")
