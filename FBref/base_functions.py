@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-# import functools
+import functools
 import time
 import requests
 from bs4 import BeautifulSoup
@@ -20,7 +20,7 @@ def page_old(urlpage):
     return soup
 """
 
-
+@functools.cache
 def page(urlpage):
     """
     Récupération du HTML d'un site internet en prenant des précautions contre le blocage.

@@ -10,14 +10,16 @@ import pandas as pd
 from tqdm import tqdm
 import ace_tools_open as tools
 
-def get_database(date_start, date_end, new, leagues = ["Ligue 1"], folder = "data"):
-    
+def get_database(date_start, date_end, new = False):
+
     T = time.time()
 
+    leagues = ["Ligue 1"]
+    folder = "data"
+
     errors = []
-    
     links = get_link_matchs(date_start, date_end, leagues)
-    
+
     if new == True:
         matchs = pd.DataFrame()
         players = pd.DataFrame()
