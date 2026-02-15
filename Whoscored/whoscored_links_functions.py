@@ -17,54 +17,99 @@ import datetime
 # --------------------------------------
 
 
-def get_link_top_leagues():
+def get_link_top_leagues(save=False):
+    """
+    Récupère les liens des principaux championnats (Top Leagues)
+    depuis la page livescores de WhoScored.
 
+    La fonction ouvre un navigateur Firefox en mode headless via Selenium,
+    clique sur le bouton des tournois principaux, puis extrait les liens
+    des compétitions à l'aide de BeautifulSoup.
+
+    Parameters
+    ----------
+    save : bool, optional (default=False)
+        Si True, sauvegarde le résultat dans un fichier CSV
+        à l'emplacement 'urls/data_link_top_leagues.csv'.
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame contenant :
+        - league : nom du championnat (extrait de l'URL)
+        - lien   : URL complète vers la page du championnat
+    """
+
+    # --- Validation de l’argument ---
+    if save not in [False, True]:
+        print("L'argument 'save' doit prendre la valeur 'True' ou 'False'")
+        return None
+
+    # --- Configuration du navigateur Firefox en mode headless ---
     options = Options()
-    options.add_argument("--headless")
-    options.add_argument("--disable-gpu")
+    options.add_argument("--headless") # Exécution sans interface graphique
+    options.add_argument("--disable-gpu") # Désactivation GPU (sécurité compatibilité)
     options.add_argument("--no-sandbox")
 
+    # Installation automatique du driver Gecko
     service = Service(GeckoDriverManager().install())
 
     url = "https://fr.whoscored.com/livescores"
-
     link_leagues = []
 
+    # Initialisation du driver
     driver = webdriver.Firefox(service=service, options=options)
 
     try:
+        # --- Chargement de la page ---
         driver.get(url)
 
-        time.sleep(2)
+        time.sleep(2) # Pause pour laisser le temps au JS de charger
 
+        # --- Attente explicite du bouton des tournois principaux ---
         prev_button = WebDriverWait(driver, 10).until(
             EC.element_to_be_clickable((By.ID, "Premier-Tournois-btn"))
         )
 
+        # Clic via JavaScript pour le retour en arrière
         driver.execute_script("arguments[0].click();", prev_button)
 
+        # --- Récupération du HTML rendu dynamiquement ---
         html = driver.page_source
         soup = BeautifulSoup(html, "html.parser")
 
+        # Extraction des liens des tournois
         code = soup.find_all("a", class_="TournamentNavButton-module_clickableArea__ZFnBl")
+
         for c in code:
             link_leagues.append("https://fr.whoscored.com" + c.get("href"))
 
     except Exception as e:
+        # Gestion générique des erreurs Selenium / parsing
         print("Erreur :", e)
 
     finally:
+        # Fermeture propre du navigateur
         driver.quit()
 
-    top_leagues = pd.DataFrame()
+    # --- Construction du DataFrame résultat ---
     leagues = []
+
+    # Extraction du nom du championnat depuis l’URL
     for link in link_leagues:
         leagues.append(link.split("/")[-1])
 
-    top_leagues["league"] = leagues
-    top_leagues["lien"] = link_leagues
+    top_leagues = pd.DataFrame({
+        "league": leagues,
+        "lien": link_leagues
+    })
 
-    top_leagues.to_csv("urls/data_link_top_leagues.csv", index=False)
+    # --- Sauvegarde optionnelle ---
+    if save == True:
+        top_leagues.to_csv(
+            "urls/data_link_top_leagues.csv", 
+            index=False
+        )
 
     return top_leagues
 
@@ -73,8 +118,13 @@ def get_link_top_leagues():
 # --------------------------------------------------
 
 
-def get_link_historical_leagues(link_leagues):
+def get_link_historical_leagues(link_leagues, save=False):
 
+    # --- Validation de l’argument ---
+    if save not in [False, True]:
+        print("L'argument 'save' doit prendre la valeur 'True' ou 'False'")
+        return None
+    
     options = Options()
     options.add_argument("--headless")
     options.add_argument("--disable-gpu")
