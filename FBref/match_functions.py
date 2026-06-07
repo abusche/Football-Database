@@ -1,10 +1,9 @@
-from datetime import datetime
 from tqdm import tqdm
 import re
 import time
 import pandas as pd
 import dateparser
-from base_functions import get_link_matchs, page
+#from links_functions import get_link_matchs, page
 
 
 ##############
@@ -92,10 +91,16 @@ def get_xg(soup):
 
 def get_stat_perc(soup):
 
-    data = pd.DataFrame(columns=['Possession_home', 'Possession_away', 'S_Passing Accuracy_home', 'SR_Passing Accuracy_home', 'Passing Accuracy_home', 
-                                 'S_Passing Accuracy_away', 'SR_Passing Accuracy_away', 'Passing Accuracy_away', 
-                                 'S_Shots on Target_home', 'SR_Shots on Target_home', 'Shots on Target_home', 'S_Shots on Target_away', 'SR_Shots on Target_away', 'Shots on Target_away', 
-                                 'S_Saves_home', 'SR_Saves_home', 'Saves_home', 'S_Saves_away', 'SR_Saves_away', 'Saves_away'])
+    data = pd.DataFrame(
+        columns=['Possession_home', 'Possession_away',
+                 'S_Passing Accuracy_home', 'SR_Passing Accuracy_home',
+                 'Passing Accuracy_home', 'S_Passing Accuracy_away',
+                 'SR_Passing Accuracy_away', 'Passing Accuracy_away',
+                 'S_Shots on Target_home', 'SR_Shots on Target_home',
+                 'Shots on Target_home', 'S_Shots on Target_away',
+                 'SR_Shots on Target_away', 'Shots on Target_away',
+                 'S_Saves_home', 'SR_Saves_home', 'Saves_home',
+                 'S_Saves_away', 'SR_Saves_away', 'Saves_away'])
 
     code = soup.find('div', id='team_stats')
 

@@ -1,7 +1,7 @@
 import re
 import pandas as pd
 from match_functions import get_event, get_teams_name
-from base_functions import get_link_matchs, page
+from FBref.links_functions import get_link_matchs, page
 import time
 from tqdm import tqdm
 

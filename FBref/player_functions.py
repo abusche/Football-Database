@@ -2,7 +2,7 @@ import time
 import pandas as pd
 from tqdm import tqdm
 
-from base_functions import get_link_matchs, page
+from FBref.links_functions import get_link_matchs, page
 from match_functions import get_event
 
 # Résumé
